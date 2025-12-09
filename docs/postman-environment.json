@@ -1,0 +1,31 @@
+{
+  "id": "facility-api-env",
+  "name": "Facility API",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://yqmxjfsdeouyhdjnfgpd.supabase.co/functions/v1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "supabase_url",
+      "value": "https://yqmxjfsdeouyhdjnfgpd.supabase.co",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "apikey",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxbXhqZnNkZW91eWhkam5mZ3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNzgxNDQsImV4cCI6MjA4MDg1NDE0NH0.-O_d4HVGwGcRfuWK5lm_KTkv_B7S_Q07Q7djMyIKbgk",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
