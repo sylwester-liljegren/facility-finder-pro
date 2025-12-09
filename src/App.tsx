@@ -7,8 +7,8 @@ import Index from "./pages/Index";
 import MapPage from "./pages/MapPage";
 import AuthPage from "./pages/AuthPage";
 import AdminPage from "./pages/AdminPage";
+import ApiDocsPage from "./pages/ApiDocsPage";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,6 +22,7 @@ const App = () => (
           <Route path="/map" element={<MapPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/api-docs" element={<ApiDocsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
