@@ -1,0 +1,472 @@
+{
+  "info": {
+    "name": "Facility API",
+    "description": "API collection for managing facilities, municipalities, and facility types.\n\n## Setup\n1. Import the 'Facility API' environment\n2. Use the 'Login' request to get an access token\n3. Copy the access_token from the response and update the environment variable\n4. Start testing the endpoints!",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for obtaining JWT tokens",
+      "item": [
+        {
+          "name": "Login (Get Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"your-email@example.com\",\n  \"password\": \"your-password\"\n}"
+            },
+            "url": {
+              "raw": "{{supabase_url}}/auth/v1/token?grant_type=password",
+              "host": ["{{supabase_url}}"],
+              "path": ["auth", "v1", "token"],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            },
+            "description": "Authenticate with email and password to receive a JWT token.\n\n**After successful login:**\n1. Copy the `access_token` from the response\n2. Update the `access_token` environment variable\n3. Use Admin API endpoints"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public API",
+      "description": "Read-only endpoints accessible without authentication",
+      "item": [
+        {
+          "name": "Get All Facilities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facilities",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                }
+              ]
+            },
+            "description": "Retrieve all facilities with related data (municipality, facility type, geometry, attributes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facility by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facilities&id=1",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                },
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Retrieve a single facility by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facilities by Municipality",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facilities&kommun_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                },
+                {
+                  "key": "kommun_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Retrieve all facilities for a specific municipality"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facilities by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facilities&facility_type_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                },
+                {
+                  "key": "facility_type_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Retrieve all facilities of a specific type"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facilities for Map",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facilities-map",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities-map"
+                }
+              ]
+            },
+            "description": "Retrieve facilities optimized for map display (only facilities with valid coordinates)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Municipalities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=municipalities",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "municipalities"
+                }
+              ]
+            },
+            "description": "Retrieve all municipalities"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facility Types",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public-api?action=facility-types",
+              "host": ["{{base_url}}"],
+              "path": ["public-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facility-types"
+                }
+              ]
+            },
+            "description": "Retrieve all facility types"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin API",
+      "description": "Protected endpoints requiring JWT authentication",
+      "item": [
+        {
+          "name": "Get All Facilities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=facilities",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                }
+              ]
+            },
+            "description": "Retrieve all facilities (admin view)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facilities by Municipality",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=facilities&kommun_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                },
+                {
+                  "key": "kommun_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Retrieve facilities for a specific municipality"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Facility by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=facilities&id=1",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "facilities"
+                },
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Retrieve a single facility by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Facility",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Sports Facility\",\n  \"address\": \"Example Street 123\",\n  \"city\": \"Stockholm\",\n  \"postal_code\": \"12345\",\n  \"kommun_id\": 1,\n  \"facility_type_id\": 1,\n  \"external_id\": \"EXT-001\",\n  \"latitude\": 59.3293,\n  \"longitude\": 18.0686\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=create-facility",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "create-facility"
+                }
+              ]
+            },
+            "description": "Create a new facility with optional geometry (latitude/longitude)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Facility",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"Updated Facility Name\",\n  \"address\": \"New Address 456\",\n  \"city\": \"Gothenburg\",\n  \"postal_code\": \"54321\",\n  \"kommun_id\": 1,\n  \"facility_type_id\": 2,\n  \"latitude\": 57.7089,\n  \"longitude\": 11.9746\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=update-facility",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "update-facility"
+                }
+              ]
+            },
+            "description": "Update an existing facility (include facility ID in the body)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Facility",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-api?action=delete-facility&id=1",
+              "host": ["{{base_url}}"],
+              "path": ["admin-api"],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "delete-facility"
+                },
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Delete a facility by ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
