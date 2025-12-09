@@ -13,6 +13,8 @@ import {
   ZoomControl,
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import "react-leaflet-cluster/lib/assets/MarkerCluster.css";
+import "react-leaflet-cluster/lib/assets/MarkerCluster.Default.css";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -338,10 +340,78 @@ export const AdvancedMap: React.FC<AdvancedMapProps> = ({
         ))}
 
         {/* Markers with optional clustering */}
-        {enableClustering ? (
-          <MarkerClusterGroup chunkedLoading>{renderMarkers}</MarkerClusterGroup>
+        {enableClustering && markers.length > 0 ? (
+          <MarkerClusterGroup chunkedLoading>
+            {markers.map((marker) => (
+              <Marker
+                key={marker.id}
+                position={marker.position}
+                icon={createCustomIcon(marker.color, marker.size)}
+                eventHandlers={{
+                  click: () => onMarkerClick?.(marker),
+                }}
+              >
+                {marker.popup && (
+                  <Popup>
+                    <div className="min-w-[150px]">
+                      {marker.popup.image && (
+                        <img
+                          src={marker.popup.image}
+                          alt={marker.popup.title || ""}
+                          className="mb-2 h-24 w-full rounded object-cover"
+                        />
+                      )}
+                      {marker.popup.title && (
+                        <h3 className="mb-1 font-semibold text-foreground">
+                          {marker.popup.title}
+                        </h3>
+                      )}
+                      {marker.popup.content && (
+                        <p className="text-sm text-muted-foreground">
+                          {marker.popup.content}
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                )}
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
         ) : (
-          renderMarkers
+          markers.map((marker) => (
+            <Marker
+              key={marker.id}
+              position={marker.position}
+              icon={createCustomIcon(marker.color, marker.size)}
+              eventHandlers={{
+                click: () => onMarkerClick?.(marker),
+              }}
+            >
+              {marker.popup && (
+                <Popup>
+                  <div className="min-w-[150px]">
+                    {marker.popup.image && (
+                      <img
+                        src={marker.popup.image}
+                        alt={marker.popup.title || ""}
+                        className="mb-2 h-24 w-full rounded object-cover"
+                      />
+                    )}
+                    {marker.popup.title && (
+                      <h3 className="mb-1 font-semibold text-foreground">
+                        {marker.popup.title}
+                      </h3>
+                    )}
+                    {marker.popup.content && (
+                      <p className="text-sm text-muted-foreground">
+                        {marker.popup.content}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              )}
+            </Marker>
+          ))
         )}
       </MapContainer>
 
