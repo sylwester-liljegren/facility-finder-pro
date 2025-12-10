@@ -22,7 +22,7 @@ import { useFacilityTypes, useKommuner } from "@/hooks/useFacilities";
 import { FacilityFormData, Facility } from "@/types/facility";
 import { Loader2, MapPin } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { geocodeApi } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -84,18 +84,14 @@ export function FacilityForm({ facility, onSubmit, onCancel, isSubmitting }: Fac
 
     setIsGeocoding(true);
     try {
-      const { data, error } = await supabase.functions.invoke("geocode", {
-        body: {
-          address,
-          postalCode,
-          city,
-          kommun: kommun?.kommun_namn,
-        },
+      const data = await geocodeApi.geocode({
+        address,
+        postalCode,
+        city,
+        kommun: kommun?.kommun_namn,
       });
 
-      if (error) throw error;
-
-      if (data.success) {
+      if (data.success && data.latitude && data.longitude) {
         form.setValue("latitude", data.latitude.toString());
         form.setValue("longitude", data.longitude.toString());
         toast({
