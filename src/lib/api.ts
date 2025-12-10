@@ -73,26 +73,37 @@ async function apiRequest<T>(
   return response.json();
 }
 
+// Auth API response from backend
+interface AuthApiResponse {
+  success: boolean;
+  data: {
+    access_token: string;
+    user: AuthUser;
+  };
+}
+
 // Auth API
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    const data = await apiRequest<AuthResponse>("/api/auth/login", {
+    const response = await apiRequest<AuthApiResponse>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
-    setToken(data.token);
-    setStoredUser(data.user);
-    return data;
+    const { access_token, user } = response.data;
+    setToken(access_token);
+    setStoredUser(user);
+    return { token: access_token, user };
   },
 
   register: async (email: string, password: string, fullName?: string): Promise<AuthResponse> => {
-    const data = await apiRequest<AuthResponse>("/api/auth/register", {
+    const response = await apiRequest<AuthApiResponse>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, full_name: fullName }),
     });
-    setToken(data.token);
-    setStoredUser(data.user);
-    return data;
+    const { access_token, user } = response.data;
+    setToken(access_token);
+    setStoredUser(user);
+    return { token: access_token, user };
   },
 
   logout: (): void => {
