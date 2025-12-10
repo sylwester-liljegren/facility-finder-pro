@@ -46,6 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
       throw new Error(`Geocoding service error: ${response.status}`);
     }
 
+    // Type assertion needed for proper TypeScript compilation in Azure
     const results: NominatimResult[] = await response.json();
     console.log("Nominatim results:", JSON.stringify(results));
 
