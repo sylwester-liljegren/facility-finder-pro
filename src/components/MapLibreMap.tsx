@@ -26,7 +26,10 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         (f) =>
           f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           f.kommun?.kommun_namn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          f.facility_type?.label?.toLowerCase().includes(searchQuery.toLowerCase())
+          f.facility_type?.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.postal_code?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : facilitiesWithCoords;
 
