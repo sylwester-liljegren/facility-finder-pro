@@ -59,13 +59,18 @@ export function FacilityMap() {
                     {selectedFacility.city && ` ${selectedFacility.city}`}
                   </p>
                 )}
-                {selectedFacility.facility_geometry?.latitude && (
-                  <p>
-                    <span className="font-medium">Koordinater:</span>{" "}
-                    {selectedFacility.facility_geometry.latitude.toFixed(4)},{" "}
-                    {selectedFacility.facility_geometry.longitude?.toFixed(4)}
-                  </p>
-                )}
+                {(() => {
+                  const geom = Array.isArray(selectedFacility.facility_geometry)
+                    ? selectedFacility.facility_geometry[0]
+                    : selectedFacility.facility_geometry;
+                  return geom?.latitude ? (
+                    <p>
+                      <span className="font-medium">Koordinater:</span>{" "}
+                      {geom.latitude.toFixed(4)},{" "}
+                      {geom.longitude?.toFixed(4)}
+                    </p>
+                  ) : null;
+                })()}
               </div>
             </div>
           )}

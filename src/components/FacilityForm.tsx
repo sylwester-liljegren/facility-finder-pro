@@ -59,8 +59,18 @@ export function FacilityForm({ facility, onSubmit, onCancel, isSubmitting }: Fac
       address: facility?.address || "",
       postal_code: facility?.postal_code || "",
       city: facility?.city || "",
-      latitude: facility?.facility_geometry?.latitude?.toString() || "",
-      longitude: facility?.facility_geometry?.longitude?.toString() || "",
+      latitude: (() => {
+        const geom = Array.isArray(facility?.facility_geometry) 
+          ? facility?.facility_geometry[0] 
+          : facility?.facility_geometry;
+        return geom?.latitude?.toString() || "";
+      })(),
+      longitude: (() => {
+        const geom = Array.isArray(facility?.facility_geometry) 
+          ? facility?.facility_geometry[0] 
+          : facility?.facility_geometry;
+        return geom?.longitude?.toString() || "";
+      })(),
     },
   });
 

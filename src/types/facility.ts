@@ -25,7 +25,7 @@ export interface Facility {
   updated_at: string;
   facility_type?: FacilityType;
   kommun?: Kommun;
-  facility_geometry?: FacilityGeometry;
+  facility_geometry?: FacilityGeometry | FacilityGeometry[];
 }
 
 export interface FacilityGeometry {

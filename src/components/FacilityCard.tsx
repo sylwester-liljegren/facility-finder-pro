@@ -12,13 +12,19 @@ interface FacilityCardProps {
 
 export function FacilityCard({ facility, onClick }: FacilityCardProps) {
   const navigate = useNavigate();
-  const hasCoordinates = facility.facility_geometry?.latitude && facility.facility_geometry?.longitude;
+  
+  // Helper to get geometry (handles both object and array)
+  const geom = Array.isArray(facility.facility_geometry)
+    ? facility.facility_geometry[0]
+    : facility.facility_geometry;
+  
+  const hasCoordinates = geom?.latitude && geom?.longitude;
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Navigate to map with facility coordinates as query params
-    const lat = facility.facility_geometry?.latitude;
-    const lng = facility.facility_geometry?.longitude;
+    const lat = geom?.latitude;
+    const lng = geom?.longitude;
     navigate(`/map?lat=${lat}&lng=${lng}&name=${encodeURIComponent(facility.name)}`);
   };
 
