@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { publicApi, adminApi } from "@/lib/api";
 import { Facility, FacilityFormData } from "@/types/facility";
 import { toast } from "@/hooks/use-toast";
 
@@ -7,22 +7,7 @@ export function useFacilities(kommunId?: number) {
   return useQuery({
     queryKey: ["facilities", kommunId],
     queryFn: async () => {
-      let query = supabase
-        .from("facility")
-        .select(`
-          *,
-          facility_type (*),
-          kommun (*),
-          facility_geometry (*)
-        `)
-        .order("name");
-
-      if (kommunId) {
-        query = query.eq("kommun_id", kommunId);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
+      const data = await publicApi.getFacilities(kommunId);
       return data as Facility[];
     },
   });
@@ -32,21 +17,7 @@ export function useMyFacilities() {
   return useQuery({
     queryKey: ["my-facilities"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from("facility")
-        .select(`
-          *,
-          facility_type (*),
-          kommun (*),
-          facility_geometry (*)
-        `)
-        .eq("created_by", user.id)
-        .order("name");
-
-      if (error) throw error;
+      const data = await adminApi.getMyFacilities();
       return data as Facility[];
     },
   });
@@ -56,18 +27,7 @@ export function useFacility(id: number) {
   return useQuery({
     queryKey: ["facility", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("facility")
-        .select(`
-          *,
-          facility_type (*),
-          kommun (*),
-          facility_geometry (*)
-        `)
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
+      const data = await publicApi.getFacility(id);
       return data as Facility;
     },
     enabled: !!id,
@@ -78,11 +38,7 @@ export function useKommuner() {
   return useQuery({
     queryKey: ["kommuner"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("kommun")
-        .select("*")
-        .order("kommun_namn");
-      if (error) throw error;
+      const data = await publicApi.getMunicipalities();
       return data;
     },
   });
@@ -92,11 +48,7 @@ export function useFacilityTypes() {
   return useQuery({
     queryKey: ["facility_types"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("facility_type")
-        .select("*")
-        .order("label");
-      if (error) throw error;
+      const data = await publicApi.getFacilityTypes();
       return data;
     },
   });
@@ -107,34 +59,7 @@ export function useCreateFacility() {
 
   return useMutation({
     mutationFn: async (formData: FacilityFormData) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { latitude, longitude, ...facilityData } = formData;
-
-      // Insert facility with created_by
-      const { data: facility, error: facilityError } = await supabase
-        .from("facility")
-        .insert({ ...facilityData, created_by: user.id })
-        .select()
-        .single();
-
-      if (facilityError) throw facilityError;
-
-      // Insert geometry if coordinates provided
-      if (latitude && longitude) {
-        const { error: geoError } = await supabase
-          .from("facility_geometry")
-          .insert({
-            facility_id: facility.id,
-            latitude,
-            longitude,
-            geom_type: "Point",
-          });
-
-        if (geoError) throw geoError;
-      }
-
+      const facility = await adminApi.createFacility(formData);
       return facility;
     },
     onSuccess: () => {
@@ -145,7 +70,7 @@ export function useCreateFacility() {
         description: "Den nya anläggningen har sparats.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Fel",
         description: "Kunde inte skapa anläggningen: " + error.message,
@@ -160,30 +85,7 @@ export function useUpdateFacility() {
 
   return useMutation({
     mutationFn: async ({ id, ...formData }: FacilityFormData & { id: number }) => {
-      const { latitude, longitude, ...facilityData } = formData;
-
-      // Update facility
-      const { error: facilityError } = await supabase
-        .from("facility")
-        .update(facilityData)
-        .eq("id", id);
-
-      if (facilityError) throw facilityError;
-
-      // Upsert geometry if coordinates provided
-      if (latitude !== undefined && longitude !== undefined) {
-        const { error: geoError } = await supabase
-          .from("facility_geometry")
-          .upsert({
-            facility_id: id,
-            latitude,
-            longitude,
-            geom_type: "Point",
-          });
-
-        if (geoError) throw geoError;
-      }
-
+      await adminApi.updateFacility(id, formData);
       return { id };
     },
     onSuccess: () => {
@@ -194,7 +96,7 @@ export function useUpdateFacility() {
         description: "Ändringarna har sparats.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Fel",
         description: "Kunde inte uppdatera anläggningen: " + error.message,
@@ -209,8 +111,7 @@ export function useDeleteFacility() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await supabase.from("facility").delete().eq("id", id);
-      if (error) throw error;
+      await adminApi.deleteFacility(id);
       return { id };
     },
     onSuccess: () => {
@@ -221,7 +122,7 @@ export function useDeleteFacility() {
         description: "Anläggningen har tagits bort.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Fel",
         description: "Kunde inte ta bort anläggningen: " + error.message,
