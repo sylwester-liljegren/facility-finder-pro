@@ -91,23 +91,23 @@ const AdminPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-8">
-        <div className="flex justify-between items-center mb-8">
+      <main className="container py-4 md:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Administration</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Administration</h1>
+            <p className="text-sm md:text-base text-muted-foreground">
               Hantera dina egna anläggningar.
             </p>
           </div>
 
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
-              <Button variant="hero">
+              <Button variant="hero" className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Ny anläggning
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Skapa ny anläggning</DialogTitle>
               </DialogHeader>
@@ -121,8 +121,8 @@ const AdminPage = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Anläggningar</CardTitle>
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="text-lg md:text-xl">Anläggningar</CardTitle>
           </CardHeader>
           <CardContent>
             {facilitiesLoading ? (
@@ -136,47 +136,91 @@ const AdminPage = () => {
                 Inga anläggningar registrerade ännu.
               </p>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Namn</TableHead>
-                      <TableHead>Typ</TableHead>
-                      <TableHead>Kommun</TableHead>
-                      <TableHead>Adress</TableHead>
-                      <TableHead className="w-24">Åtgärder</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {facilities?.map((facility) => (
-                      <TableRow key={facility.id}>
-                        <TableCell className="font-medium">{facility.name}</TableCell>
-                        <TableCell>{facility.facility_type?.label || "—"}</TableCell>
-                        <TableCell>{facility.kommun?.kommun_namn || "—"}</TableCell>
-                        <TableCell>{facility.address || "—"}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setEditingFacility(facility)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setDeletingFacility(facility)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
+              <>
+                {/* Mobile card view */}
+                <div className="md:hidden space-y-3">
+                  {facilities?.map((facility) => (
+                    <div
+                      key={facility.id}
+                      className="p-4 border rounded-lg bg-card space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate">{facility.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {facility.facility_type?.label || "Ingen typ"}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setEditingFacility(facility)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setDeletingFacility(facility)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        {facility.kommun && <p>{facility.kommun.kommun_namn}</p>}
+                        {facility.address && <p>{facility.address}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table view */}
+                <div className="hidden md:block rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Namn</TableHead>
+                        <TableHead>Typ</TableHead>
+                        <TableHead>Kommun</TableHead>
+                        <TableHead>Adress</TableHead>
+                        <TableHead className="w-24">Åtgärder</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {facilities?.map((facility) => (
+                        <TableRow key={facility.id}>
+                          <TableCell className="font-medium">{facility.name}</TableCell>
+                          <TableCell>{facility.facility_type?.label || "—"}</TableCell>
+                          <TableCell>{facility.kommun?.kommun_namn || "—"}</TableCell>
+                          <TableCell>{facility.address || "—"}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setEditingFacility(facility)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDeletingFacility(facility)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

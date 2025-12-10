@@ -58,9 +58,9 @@ export function FacilityList({ onFacilityClick }: FacilityListProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 max-w-md">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Sök anläggning..."
@@ -70,9 +70,9 @@ export function FacilityList({ onFacilityClick }: FacilityListProps) {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
           <Select value={selectedKommun} onValueChange={setSelectedKommun}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Välj kommun" />
             </SelectTrigger>
             <SelectContent>

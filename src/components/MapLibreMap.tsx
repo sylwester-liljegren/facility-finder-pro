@@ -133,24 +133,24 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
 
   return (
     <div className={`relative ${className}`}>
-      {/* Search input */}
-      <div className="absolute top-4 left-4 z-10">
+      {/* Search input - responsive width */}
+      <div className="absolute top-3 left-3 right-3 md:right-auto z-10">
         <input
           type="text"
-          placeholder="Sök anläggning, kommun eller typ..."
+          placeholder="Sök anläggning, adress..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-72 px-4 py-2 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full md:w-72 px-3 py-2 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
 
       {/* Map container */}
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
 
-      {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-10 rounded-lg bg-background/95 backdrop-blur p-3 shadow-lg border border-border">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow" />
+      {/* Legend - responsive positioning */}
+      <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-background/95 backdrop-blur px-3 py-2 shadow-lg border border-border">
+        <div className="flex items-center gap-2 text-xs md:text-sm">
+          <div className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" />
           <span className="text-muted-foreground">
             {filteredFacilities.length} anläggningar
             {searchQuery && ` (av ${facilitiesWithCoords.length})`}
