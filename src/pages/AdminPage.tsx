@@ -96,7 +96,7 @@ const AdminPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Administration</h1>
             <p className="text-muted-foreground">
-              Hantera anläggningar i registret.
+              Hantera dina egna anläggningar.
             </p>
           </div>
 
