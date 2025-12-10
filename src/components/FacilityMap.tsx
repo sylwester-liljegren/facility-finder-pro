@@ -18,7 +18,7 @@ export function FacilityMap() {
 
   if (isLoading) {
     return (
-      <Card className="h-[600px] flex items-center justify-center">
+      <Card className="h-[400px] md:h-[600px] flex items-center justify-center">
         <Skeleton className="w-full h-full" />
       </Card>
     );
@@ -30,7 +30,7 @@ export function FacilityMap() {
         <MapLibreMap
           facilities={facilities || []}
           onFacilityClick={setSelectedFacility}
-          className="h-[600px]"
+          className="h-[400px] md:h-[600px]"
         />
       </Card>
 
