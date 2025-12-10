@@ -1,19 +1,17 @@
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { publicApiRouter } from './routes/public-api';
 import { adminApiRouter } from './routes/admin-api';
 import { geocodeRouter } from './routes/geocode';
 import { authRouter } from './routes/auth';
 
-dotenv.config();
-
-// Debug: Log database config (remove in production)
+// Debug: Log database config
 console.log('=== Database Config ===');
-console.log('DB_HOST:', process.env.DB_HOST || '(not set - using localhost)');
-console.log('DB_PORT:', process.env.DB_PORT || '(not set - using 5432)');
-console.log('DB_NAME:', process.env.DB_NAME || '(not set)');
-console.log('DB_USER:', process.env.DB_USER || '(not set)');
+console.log('DB_HOST:', process.env.DB_HOST || '(not set)');
 console.log('DB_SSL:', process.env.DB_SSL || '(not set)');
 console.log('=======================');
 
