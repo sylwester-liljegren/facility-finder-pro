@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/select";
 import { useFacilityTypes, useKommuner } from "@/hooks/useFacilities";
 import { FacilityFormData, Facility } from "@/types/facility";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Namn krävs"),
@@ -45,6 +48,7 @@ interface FacilityFormProps {
 export function FacilityForm({ facility, onSubmit, onCancel, isSubmitting }: FacilityFormProps) {
   const { data: facilityTypes } = useFacilityTypes();
   const { data: kommuner } = useKommuner();
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -59,6 +63,63 @@ export function FacilityForm({ facility, onSubmit, onCancel, isSubmitting }: Fac
       longitude: facility?.facility_geometry?.longitude?.toString() || "",
     },
   });
+
+  const handleGeocode = async () => {
+    const address = form.getValues("address");
+    const postalCode = form.getValues("postal_code");
+    const city = form.getValues("city");
+    const kommunId = form.getValues("kommun_id");
+    
+    // Get kommun name from id
+    const kommun = kommuner?.find(k => k.id.toString() === kommunId);
+
+    if (!address && !city && !kommun) {
+      toast({
+        title: "Adress saknas",
+        description: "Ange minst adress, ort eller kommun för att hämta koordinater.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeocoding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", {
+        body: {
+          address,
+          postalCode,
+          city,
+          kommun: kommun?.kommun_namn,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        form.setValue("latitude", data.latitude.toString());
+        form.setValue("longitude", data.longitude.toString());
+        toast({
+          title: "Koordinater hittade",
+          description: `${data.displayName}`,
+        });
+      } else {
+        toast({
+          title: "Kunde inte hitta koordinater",
+          description: data.error || "Kontrollera adressen och försök igen.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      toast({
+        title: "Fel",
+        description: "Ett fel uppstod vid hämtning av koordinater.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
 
   const handleSubmit = (values: FormValues) => {
     const data: FacilityFormData = {
@@ -187,34 +248,54 @@ export function FacilityForm({ facility, onSubmit, onCancel, isSubmitting }: Fac
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="latitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Latitud</FormLabel>
-                <FormControl>
-                  <Input type="number" step="any" placeholder="59.3293" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Koordinater</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGeocode}
+              disabled={isGeocoding}
+            >
+              {isGeocoding ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <MapPin className="mr-2 h-4 w-4" />
+              )}
+              Hämta från adress
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Latitud</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="59.3293" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="longitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Longitud</FormLabel>
-                <FormControl>
-                  <Input type="number" step="any" placeholder="18.0686" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="longitude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Longitud</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="18.0686" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
