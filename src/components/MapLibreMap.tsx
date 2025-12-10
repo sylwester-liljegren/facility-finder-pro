@@ -43,30 +43,13 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       )
     : facilitiesWithCoords;
 
-  // Geocode search function
+  // Geocode search function - always geocode first to find the location
   const handleSearch = async () => {
     if (!searchQuery.trim() || !map.current) return;
 
-    // First check if we have matching facilities
-    if (filteredFacilities.length > 0) {
-      const bounds = new maplibregl.LngLatBounds();
-      filteredFacilities.forEach((f) => {
-        bounds.extend([
-          f.facility_geometry!.longitude!,
-          f.facility_geometry!.latitude!,
-        ]);
-      });
-      map.current.fitBounds(bounds, {
-        padding: 60,
-        maxZoom: 12,
-        duration: 500,
-      });
-      return;
-    }
-
-    // No matching facilities - geocode the location
     setIsSearching(true);
     try {
+      // Always geocode the search query first
       const { data, error } = await supabase.functions.invoke("geocode", {
         body: { address: searchQuery },
       });
@@ -78,25 +61,41 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
           locationMarkerRef.current = null;
         }
 
-        // Fly to the location
+        // Fly to the geocoded location
         map.current.flyTo({
           center: [data.longitude, data.latitude],
           zoom: 12,
           duration: 1000,
         });
 
-        // Add a temporary marker for the searched location
-        const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
-          <div style="padding: 8px;">
-            <p style="font-size: 12px; color: #666;">${searchQuery}</p>
-            <p style="font-size: 11px; color: #888;">Inga anläggningar här</p>
-          </div>
-        `);
+        // Only add a location marker if no facilities match in this area
+        if (filteredFacilities.length === 0) {
+          const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
+            <div style="padding: 8px;">
+              <p style="font-size: 12px; color: #666;">${data.displayName || searchQuery}</p>
+              <p style="font-size: 11px; color: #888;">Inga anläggningar här</p>
+            </div>
+          `);
 
-        locationMarkerRef.current = new maplibregl.Marker({ color: "#ef4444" })
-          .setLngLat([data.longitude, data.latitude])
-          .setPopup(popup)
-          .addTo(map.current);
+          locationMarkerRef.current = new maplibregl.Marker({ color: "#ef4444" })
+            .setLngLat([data.longitude, data.latitude])
+            .setPopup(popup)
+            .addTo(map.current);
+        }
+      } else if (filteredFacilities.length > 0) {
+        // Fallback: if geocoding fails but we have matching facilities, zoom to them
+        const bounds = new maplibregl.LngLatBounds();
+        filteredFacilities.forEach((f) => {
+          bounds.extend([
+            f.facility_geometry!.longitude!,
+            f.facility_geometry!.latitude!,
+          ]);
+        });
+        map.current.fitBounds(bounds, {
+          padding: 60,
+          maxZoom: 12,
+          duration: 500,
+        });
       }
     } catch (err) {
       console.error("Geocode error:", err);
