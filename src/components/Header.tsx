@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Building2, LogOut, Settings, MapPin, Menu, X, FileText } from "lucide-react";
+import { Building2, LogOut, Settings, MapPin, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -47,17 +47,6 @@ export function Header() {
             <span className="flex items-center gap-1.5">
               <MapPin className="h-4 w-4" />
               Karta
-            </span>
-          </Link>
-          <Link
-            to="/api-docs"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive("/api-docs") ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            <span className="flex items-center gap-1.5">
-              <FileText className="h-4 w-4" />
-              API Docs
             </span>
           </Link>
           {isAuthenticated && (
@@ -121,14 +110,6 @@ export function Header() {
             >
               <MapPin className="h-4 w-4" />
               Karta
-            </Link>
-            <Link
-              to="/api-docs"
-              className="flex items-center gap-2 text-sm font-medium py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <FileText className="h-4 w-4" />
-              API Docs
             </Link>
             {isAuthenticated && (
               <Link
