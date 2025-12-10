@@ -59,20 +59,31 @@ export function FacilityList({ onFacilityClick }: FacilityListProps) {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col gap-3">
+      <form 
+        className="flex flex-col gap-3" 
+        role="search" 
+        aria-label="Sök anläggningar"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
+            id="facility-search"
             placeholder="Sök anläggning..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
+            aria-label="Sök bland anläggningar"
+            type="search"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
           <Select value={selectedKommun} onValueChange={setSelectedKommun}>
-            <SelectTrigger className="w-full sm:w-48">
+            <SelectTrigger 
+              className="w-full sm:w-48"
+              aria-label="Välj kommun att filtrera på"
+            >
               <SelectValue placeholder="Välj kommun" />
             </SelectTrigger>
             <SelectContent>
@@ -85,10 +96,14 @@ export function FacilityList({ onFacilityClick }: FacilityListProps) {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </form>
 
       {filteredFacilities.length === 0 ? (
-        <div className="text-center py-12">
+        <div 
+          className="text-center py-12" 
+          role="status" 
+          aria-live="polite"
+        >
           <p className="text-muted-foreground">
             {searchQuery || selectedKommun !== "all"
               ? "Inga anläggningar matchar din sökning."
@@ -97,19 +112,28 @@ export function FacilityList({ onFacilityClick }: FacilityListProps) {
         </div>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
+          <p 
+            className="text-sm text-muted-foreground" 
+            role="status" 
+            aria-live="polite"
+          >
             Visar {filteredFacilities.length} anläggning
             {filteredFacilities.length !== 1 ? "ar" : ""}
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul 
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            role="list"
+            aria-label="Lista över anläggningar"
+          >
             {filteredFacilities.map((facility) => (
-              <FacilityCard
-                key={facility.id}
-                facility={facility}
-                onClick={() => onFacilityClick?.(facility)}
-              />
+              <li key={facility.id}>
+                <FacilityCard
+                  facility={facility}
+                  onClick={() => onFacilityClick?.(facility)}
+                />
+              </li>
             ))}
-          </div>
+          </ul>
         </>
       )}
     </div>

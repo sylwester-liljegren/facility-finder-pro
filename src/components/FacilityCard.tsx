@@ -22,10 +22,21 @@ export function FacilityCard({ facility, onClick }: FacilityCardProps) {
     navigate(`/map?lat=${lat}&lng=${lng}&name=${encodeURIComponent(facility.name)}`);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <Card
-      className="cursor-pointer transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 gradient-card"
+      className="cursor-pointer transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 gradient-card focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="article"
+      aria-label={`${facility.name}${facility.facility_type ? `, ${facility.facility_type.label}` : ""}${facility.kommun ? `, ${facility.kommun.kommun_namn}` : ""}`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
@@ -38,30 +49,33 @@ export function FacilityCard({ facility, onClick }: FacilityCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="space-y-2">
+        <dl className="space-y-2">
           {facility.kommun && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Building className="h-4 w-4 shrink-0" />
-              <span>{facility.kommun.kommun_namn}</span>
+              <Building className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <dt className="sr-only">Kommun:</dt>
+              <dd>{facility.kommun.kommun_namn}</dd>
             </div>
           )}
           {facility.address && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="truncate">
+              <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <dt className="sr-only">Adress:</dt>
+              <dd className="truncate">
                 {facility.address}
                 {facility.postal_code && `, ${facility.postal_code}`}
                 {facility.city && ` ${facility.city}`}
-              </span>
+              </dd>
             </div>
           )}
           {facility.facility_type?.code && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Tag className="h-4 w-4 shrink-0" />
-              <span className="font-mono text-xs">{facility.facility_type.code}</span>
+              <Tag className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <dt className="sr-only">Typkod:</dt>
+              <dd className="font-mono text-xs">{facility.facility_type.code}</dd>
             </div>
           )}
-        </div>
+        </dl>
 
         {hasCoordinates && (
           <Button
@@ -69,8 +83,9 @@ export function FacilityCard({ facility, onClick }: FacilityCardProps) {
             size="sm"
             className="w-full mt-2"
             onClick={handleMapClick}
+            aria-label={`Visa ${facility.name} på kartan`}
           >
-            <MapPin className="h-4 w-4 mr-2" />
+            <MapPin className="h-4 w-4 mr-2" aria-hidden="true" />
             Visa på karta
           </Button>
         )}

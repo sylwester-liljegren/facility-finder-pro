@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Building2, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { Helmet } from "react-helmet-async";
 
 const emailSchema = z.string().email("Ogiltig e-postadress");
 const passwordSchema = z.string().min(6, "Lösenordet måste vara minst 6 tecken");
@@ -97,108 +98,151 @@ const AuthPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div 
+        className="min-h-screen flex items-center justify-center bg-background"
+        role="status"
+        aria-label="Laddar"
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <span className="sr-only">Laddar autentisering...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
+    <>
+      <Helmet>
+        <title>Logga in - Anläggningsregister</title>
+        <meta name="description" content="Logga in för att administrera kommunala anläggningar i registret." />
+      </Helmet>
+      
+      <main 
+        className="min-h-screen flex items-center justify-center bg-background p-4"
+        role="main"
+      >
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div 
+                className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary"
+                aria-hidden="true"
+              >
+                <Building2 className="h-6 w-6 text-primary-foreground" />
+              </div>
             </div>
-          </div>
-          <CardTitle className="text-2xl">Anläggningsregister</CardTitle>
-          <CardDescription>
-            Logga in för att administrera anläggningar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Logga in</TabsTrigger>
-              <TabsTrigger value="signup">Registrera</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">E-post</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="din@email.se"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Lösenord</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Logga in
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Namn</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Ditt namn"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">E-post</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="din@email.se"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Lösenord</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Minst 6 tecken"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Skapa konto
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+            <CardTitle className="text-2xl" id="auth-title">Anläggningsregister</CardTitle>
+            <CardDescription>
+              Logga in för att administrera anläggningar
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="signin" aria-labelledby="auth-title">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Logga in</TabsTrigger>
+                <TabsTrigger value="signup">Registrera</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin">
+                <form 
+                  onSubmit={handleSignIn} 
+                  className="space-y-4 pt-4"
+                  aria-label="Inloggningsformulär"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">E-post</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="din@email.se"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      aria-describedby="signin-email-hint"
+                    />
+                    <span id="signin-email-hint" className="sr-only">
+                      Ange din e-postadress för inloggning
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Lösenord</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      aria-describedby="signin-password-hint"
+                    />
+                    <span id="signin-password-hint" className="sr-only">
+                      Ange ditt lösenord
+                    </span>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                    {loading ? "Loggar in..." : "Logga in"}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form 
+                  onSubmit={handleSignUp} 
+                  className="space-y-4 pt-4"
+                  aria-label="Registreringsformulär"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Namn</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Ditt namn"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      autoComplete="name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">E-post</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="din@email.se"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Lösenord</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Minst 6 tecken"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="new-password"
+                      aria-describedby="password-requirements"
+                    />
+                    <span id="password-requirements" className="text-xs text-muted-foreground">
+                      Lösenordet måste vara minst 6 tecken
+                    </span>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                    {loading ? "Skapar konto..." : "Skapa konto"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </main>
+    </>
   );
 };
 

@@ -203,39 +203,101 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   }, [facilitiesWithCoords, filteredFacilities, onFacilityClick, searchQuery]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div 
+      className={`relative ${className}`}
+      role="application"
+      aria-label="Interaktiv karta med anläggningar"
+    >
       {/* Search input - responsive width */}
-      <div className="absolute top-3 left-3 right-3 md:right-auto z-10 flex gap-2">
+      <form 
+        className="absolute top-3 left-3 right-3 md:right-auto z-10 flex gap-2"
+        role="search"
+        aria-label="Sök på kartan"
+        onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+      >
         <div className="relative flex-1 md:w-72 md:flex-none">
+          <label htmlFor="map-search" className="sr-only">
+            Sök anläggning eller plats på kartan
+          </label>
           <input
-            type="text"
+            id="map-search"
+            type="search"
             placeholder="Sök anläggning eller plats..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full px-3 py-2 pr-10 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-describedby="search-status"
           />
           <button
-            onClick={handleSearch}
+            type="submit"
             disabled={isSearching}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            aria-label={isSearching ? "Söker..." : "Sök"}
           >
             {isSearching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Search className="h-4 w-4" />
+              <Search className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </div>
+      </form>
+
+      {/* Screen reader announcements */}
+      <div 
+        id="search-status" 
+        className="sr-only" 
+        role="status" 
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {isSearching 
+          ? "Söker efter platsen..." 
+          : `${filteredFacilities.length} anläggningar visas på kartan`
+        }
       </div>
 
       {/* Map container */}
-      <div ref={mapContainer} className="w-full h-full rounded-lg" />
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg" 
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+
+      {/* Accessible summary for screen readers */}
+      <div className="sr-only" role="region" aria-label="Kartinformation">
+        <h2>Anläggningar på kartan</h2>
+        <p>
+          Kartan visar {filteredFacilities.length} anläggningar
+          {searchQuery && ` för sökningen "${searchQuery}"`}.
+        </p>
+        <ul>
+          {filteredFacilities.slice(0, 10).map((f) => (
+            <li key={f.id}>
+              {f.name}
+              {f.facility_type && `, ${f.facility_type.label}`}
+              {f.kommun && ` i ${f.kommun.kommun_namn}`}
+            </li>
+          ))}
+          {filteredFacilities.length > 10 && (
+            <li>Och {filteredFacilities.length - 10} fler anläggningar.</li>
+          )}
+        </ul>
+      </div>
 
       {/* Legend - responsive positioning */}
-      <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-background/95 backdrop-blur px-3 py-2 shadow-lg border border-border">
+      <div 
+        className="absolute bottom-3 left-3 z-10 rounded-lg bg-background/95 backdrop-blur px-3 py-2 shadow-lg border border-border"
+        role="status"
+        aria-live="polite"
+      >
         <div className="flex items-center gap-2 text-xs md:text-sm">
-          <div className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" />
+          <div 
+            className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" 
+            aria-hidden="true"
+          />
           <span className="text-muted-foreground">
             {filteredFacilities.length} anläggningar
             {searchQuery && ` (av ${facilitiesWithCoords.length})`}
