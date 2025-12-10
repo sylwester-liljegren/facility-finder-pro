@@ -63,6 +63,7 @@ export type Database = {
           address: string | null
           city: string | null
           created_at: string | null
+          created_by: string | null
           external_id: string | null
           facility_type_id: number | null
           id: number
@@ -75,6 +76,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string | null
+          created_by?: string | null
           external_id?: string | null
           facility_type_id?: number | null
           id?: number
@@ -87,6 +89,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string | null
+          created_by?: string | null
           external_id?: string | null
           facility_type_id?: number | null
           id?: number
