@@ -3,6 +3,8 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Facility } from "@/types/facility";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Search, Loader2 } from "lucide-react";
 
 interface MapLibreMapProps {
   facilities: Facility[];
@@ -14,21 +16,21 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const locationMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [searchParams] = useSearchParams();
-  const initialFlyDone = useRef(false);
 
   // Get initial position from URL params
   const initialLat = searchParams.get("lat");
   const initialLng = searchParams.get("lng");
-  const initialName = searchParams.get("name");
 
-  // Filter facilities with coordinates
+  // Filter facilities with coordinates - always show all when no search
   const facilitiesWithCoords = facilities.filter(
     (f) => f.facility_geometry?.latitude && f.facility_geometry?.longitude
   );
 
-  // Search filtered facilities
+  // Search filtered facilities (only filter markers, don't hide non-matching)
   const filteredFacilities = searchQuery
     ? facilitiesWithCoords.filter(
         (f) =>
@@ -40,6 +42,75 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
           f.postal_code?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : facilitiesWithCoords;
+
+  // Geocode search function
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || !map.current) return;
+
+    // First check if we have matching facilities
+    if (filteredFacilities.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      filteredFacilities.forEach((f) => {
+        bounds.extend([
+          f.facility_geometry!.longitude!,
+          f.facility_geometry!.latitude!,
+        ]);
+      });
+      map.current.fitBounds(bounds, {
+        padding: 60,
+        maxZoom: 12,
+        duration: 500,
+      });
+      return;
+    }
+
+    // No matching facilities - geocode the location
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", {
+        body: { address: searchQuery },
+      });
+
+      if (!error && data?.latitude && data?.longitude) {
+        // Remove previous location marker
+        if (locationMarkerRef.current) {
+          locationMarkerRef.current.remove();
+          locationMarkerRef.current = null;
+        }
+
+        // Fly to the location
+        map.current.flyTo({
+          center: [data.longitude, data.latitude],
+          zoom: 12,
+          duration: 1000,
+        });
+
+        // Add a temporary marker for the searched location
+        const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
+          <div style="padding: 8px;">
+            <p style="font-size: 12px; color: #666;">${searchQuery}</p>
+            <p style="font-size: 11px; color: #888;">Inga anläggningar här</p>
+          </div>
+        `);
+
+        locationMarkerRef.current = new maplibregl.Marker({ color: "#ef4444" })
+          .setLngLat([data.longitude, data.latitude])
+          .setPopup(popup)
+          .addTo(map.current);
+      }
+    } catch (err) {
+      console.error("Geocode error:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -84,7 +155,7 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
     };
   }, []);
 
-  // Update markers when facilities change
+  // Update markers when facilities change (always show all facilities)
   useEffect(() => {
     if (!map.current) return;
 
@@ -92,10 +163,13 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Add new markers
-    filteredFacilities.forEach((facility) => {
+    // Add markers for ALL facilities with coords (not filtered)
+    facilitiesWithCoords.forEach((facility) => {
       const lat = facility.facility_geometry!.latitude!;
       const lng = facility.facility_geometry!.longitude!;
+
+      // Check if this facility matches the search
+      const isMatch = !searchQuery || filteredFacilities.some(f => f.id === facility.id);
 
       // Create popup
       const popup = new maplibregl.Popup({
@@ -110,9 +184,9 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         </div>
       `);
 
-      // Use default MapLibre marker (more stable)
+      // Use different colors for matching vs non-matching facilities
       const marker = new maplibregl.Marker({
-        color: "#3b82f6",
+        color: isMatch ? "#3b82f6" : "#9ca3af",
       })
         .setLngLat([lng, lat])
         .setPopup(popup)
@@ -127,36 +201,33 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
 
       markersRef.current.push(marker);
     });
-
-    // Fit bounds if there are markers and search is active
-    if (filteredFacilities.length > 0 && searchQuery) {
-      const bounds = new maplibregl.LngLatBounds();
-      filteredFacilities.forEach((f) => {
-        bounds.extend([
-          f.facility_geometry!.longitude!,
-          f.facility_geometry!.latitude!,
-        ]);
-      });
-
-      map.current.fitBounds(bounds, {
-        padding: 60,
-        maxZoom: 12,
-        duration: 500,
-      });
-    }
-  }, [filteredFacilities, onFacilityClick, searchQuery]);
+  }, [facilitiesWithCoords, filteredFacilities, onFacilityClick, searchQuery]);
 
   return (
     <div className={`relative ${className}`}>
       {/* Search input - responsive width */}
-      <div className="absolute top-3 left-3 right-3 md:right-auto z-10">
-        <input
-          type="text"
-          placeholder="Sök anläggning, adress..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full md:w-72 px-3 py-2 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+      <div className="absolute top-3 left-3 right-3 md:right-auto z-10 flex gap-2">
+        <div className="relative flex-1 md:w-72 md:flex-none">
+          <input
+            type="text"
+            placeholder="Sök anläggning eller plats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full px-3 py-2 pr-10 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={handleSearch}
+            disabled={isSearching}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isSearching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Map container */}
