@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Facility } from "@/types/facility";
+import { useSearchParams } from "react-router-dom";
 
 interface MapLibreMapProps {
   facilities: Facility[];
@@ -14,6 +15,13 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialFlyDone = useRef(false);
+
+  // Get initial position from URL params
+  const initialLat = searchParams.get("lat");
+  const initialLng = searchParams.get("lng");
+  const initialName = searchParams.get("name");
 
   // Filter facilities with coordinates
   const facilitiesWithCoords = facilities.filter(
@@ -36,12 +44,19 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Initialize map centered on Sweden
+    // Determine initial center and zoom
+    const hasInitialPosition = initialLat && initialLng;
+    const center: [number, number] = hasInitialPosition
+      ? [parseFloat(initialLng), parseFloat(initialLat)]
+      : [16.5, 62.5];
+    const zoom = hasInitialPosition ? 14 : 4.5;
+
+    // Initialize map
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-      center: [16.5, 62.5], // Sweden center [lng, lat]
-      zoom: 4.5,
+      center,
+      zoom,
       minZoom: 3,
       maxZoom: 18,
     });
