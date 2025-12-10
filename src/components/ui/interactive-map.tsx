@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -12,7 +12,6 @@ import {
   useMapEvents,
   ZoomControl,
 } from "react-leaflet";
-// MarkerClusterGroup removed due to compatibility issues with react-leaflet v5
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -121,71 +120,12 @@ const createCustomIcon = (
   });
 };
 
-// Map controls component
-const MapControls: React.FC<{
-  onLocate: () => void;
-  onToggleSatellite: () => void;
-  isSatellite: boolean;
-}> = ({ onLocate, onToggleSatellite, isSatellite }) => {
-  return (
-    <div className="absolute bottom-4 left-4 z-[1000] flex flex-col gap-2">
-      <button
-        onClick={onLocate}
-        className="flex items-center gap-2 rounded-lg bg-background/95 px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent"
-        title="Find my location"
-      >
-        📍 Hitta mig
-      </button>
-      <button
-        onClick={onToggleSatellite}
-        className="flex items-center gap-2 rounded-lg bg-background/95 px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent"
-        title="Toggle satellite view"
-      >
-        {isSatellite ? "🗺️ Karta" : "🛰️ Satellit"}
-      </button>
-    </div>
-  );
-};
-
-// Search component
-const SearchControl: React.FC<{
-  onSearch: (query: string) => void;
-}> = ({ onSearch }) => {
-  const [query, setQuery] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      onSearch(query.trim());
-    }
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="absolute right-4 top-4 z-[1000] flex gap-2"
-    >
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Sök plats..."
-        className="rounded-lg border border-border bg-background/95 px-3 py-2 text-sm text-foreground shadow-lg backdrop-blur placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-      <button
-        type="submit"
-        className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
-      >
-        🔍
-      </button>
-    </form>
-  );
-};
-
-// Map events handler
-const MapEventsHandler: React.FC<{
+// Map events handler component
+function MapEventsHandler({
+  onMapClick,
+}: {
   onMapClick?: (latlng: L.LatLng) => void;
-}> = ({ onMapClick }) => {
+}) {
   useMapEvents({
     click: (e) => {
       if (onMapClick) {
@@ -194,13 +134,16 @@ const MapEventsHandler: React.FC<{
     },
   });
   return null;
-};
+}
 
-// Locate control
-const LocateControl: React.FC<{ locate: boolean; onLocated: () => void }> = ({
+// Locate control component
+function LocateControl({
   locate,
   onLocated,
-}) => {
+}: {
+  locate: boolean;
+  onLocated: () => void;
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -211,11 +154,11 @@ const LocateControl: React.FC<{ locate: boolean; onLocated: () => void }> = ({
   }, [locate, map, onLocated]);
 
   return null;
-};
+}
 
 // Main component
-export const AdvancedMap: React.FC<AdvancedMapProps> = ({
-  center = [62.5, 16.5], // Default to Sweden center
+export function AdvancedMap({
+  center = [62.5, 16.5],
   zoom = 5,
   markers = [],
   circles = [],
@@ -227,9 +170,10 @@ export const AdvancedMap: React.FC<AdvancedMapProps> = ({
   enableControls = true,
   style = { height: "600px", width: "100%" },
   className = "",
-}) => {
+}: AdvancedMapProps) {
   const [isSatellite, setIsSatellite] = useState(false);
   const [shouldLocate, setShouldLocate] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const tileUrl = isSatellite
     ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -243,58 +187,23 @@ export const AdvancedMap: React.FC<AdvancedMapProps> = ({
     setShouldLocate(true);
   }, []);
 
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
       );
       const data = await response.json();
       if (data && data.length > 0) {
         const { lat, lon } = data[0];
-        // We'll handle this via state in parent component if needed
         console.log("Found location:", lat, lon);
       }
     } catch (error) {
       console.error("Search error:", error);
     }
-  }, []);
-
-  const renderMarkers = useMemo(() => {
-    return markers.map((marker) => (
-      <Marker
-        key={marker.id}
-        position={marker.position}
-        icon={createCustomIcon(marker.color, marker.size)}
-        eventHandlers={{
-          click: () => onMarkerClick?.(marker),
-        }}
-      >
-        {marker.popup && (
-          <Popup>
-            <div className="min-w-[150px]">
-              {marker.popup.image && (
-                <img
-                  src={marker.popup.image}
-                  alt={marker.popup.title || ""}
-                  className="mb-2 h-24 w-full rounded object-cover"
-                />
-              )}
-              {marker.popup.title && (
-                <h3 className="mb-1 font-semibold text-foreground">
-                  {marker.popup.title}
-                </h3>
-              )}
-              {marker.popup.content && (
-                <p className="text-sm text-muted-foreground">
-                  {marker.popup.content}
-                </p>
-              )}
-            </div>
-          </Popup>
-        )}
-      </Marker>
-    ));
-  }, [markers, onMarkerClick]);
+  }, [searchQuery]);
 
   return (
     <div className={`relative ${className}`} style={style}>
@@ -374,14 +283,47 @@ export const AdvancedMap: React.FC<AdvancedMapProps> = ({
         ))}
       </MapContainer>
 
-      {enableSearch && <SearchControl onSearch={handleSearch} />}
+      {/* Search Control */}
+      {enableSearch && (
+        <form
+          onSubmit={handleSearch}
+          className="absolute right-4 top-4 z-[1000] flex gap-2"
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Sök plats..."
+            className="rounded-lg border border-border bg-background/95 px-3 py-2 text-sm text-foreground shadow-lg backdrop-blur placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+          >
+            🔍
+          </button>
+        </form>
+      )}
+
+      {/* Map Controls */}
       {enableControls && (
-        <MapControls
-          onLocate={handleLocate}
-          onToggleSatellite={() => setIsSatellite(!isSatellite)}
-          isSatellite={isSatellite}
-        />
+        <div className="absolute bottom-4 left-4 z-[1000] flex flex-col gap-2">
+          <button
+            onClick={handleLocate}
+            className="flex items-center gap-2 rounded-lg bg-background/95 px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent"
+            title="Find my location"
+          >
+            📍 Hitta mig
+          </button>
+          <button
+            onClick={() => setIsSatellite(!isSatellite)}
+            className="flex items-center gap-2 rounded-lg bg-background/95 px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent"
+            title="Toggle satellite view"
+          >
+            {isSatellite ? "🗺️ Karta" : "🛰️ Satellit"}
+          </button>
+        </div>
       )}
     </div>
   );
-};
+}
