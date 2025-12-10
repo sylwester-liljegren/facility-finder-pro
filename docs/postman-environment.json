@@ -1,22 +1,10 @@
 {
-  "id": "facility-api-env",
-  "name": "Facility API",
+  "id": "cif-facility-api-env",
+  "name": "CIF Facility API Environment",
   "values": [
     {
       "key": "base_url",
-      "value": "https://yqmxjfsdeouyhdjnfgpd.supabase.co/functions/v1",
-      "type": "default",
-      "enabled": true
-    },
-    {
-      "key": "supabase_url",
-      "value": "https://yqmxjfsdeouyhdjnfgpd.supabase.co",
-      "type": "default",
-      "enabled": true
-    },
-    {
-      "key": "apikey",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxbXhqZnNkZW91eWhkam5mZ3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNzgxNDQsImV4cCI6MjA4MDg1NDE0NH0.-O_d4HVGwGcRfuWK5lm_KTkv_B7S_Q07Q7djMyIKbgk",
+      "value": "https://cif-api-app.proudground-0c10ab6c.swedencentral.azurecontainerapps.io",
       "type": "default",
       "enabled": true
     },
