@@ -9,6 +9,12 @@ interface GeocodeRequest {
   kommun?: string;
 }
 
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
 // POST /api/geocode
 router.post('/', async (req: Request, res: Response) => {
   try {
@@ -40,7 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
       throw new Error(`Geocoding service error: ${response.status}`);
     }
 
-    const results = await response.json();
+    const results: NominatimResult[] = await response.json();
     console.log("Nominatim results:", JSON.stringify(results));
 
     if (results && results.length > 0) {
