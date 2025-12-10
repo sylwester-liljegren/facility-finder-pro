@@ -100,50 +100,66 @@ export const authApi = {
   },
 };
 
+// API response wrapper type
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  count?: number;
+  timestamp?: string;
+}
+
 // Public API
 export const publicApi = {
   getFacilities: async (kommunId?: number) => {
     const params = kommunId ? `?kommun_id=${kommunId}` : "";
-    return apiRequest<any[]>(`/api/public/facilities${params}`);
+    const response = await apiRequest<ApiResponse<any[]>>(`/api/public/facilities${params}`);
+    return response.data;
   },
 
   getFacility: async (id: number) => {
-    return apiRequest<any>(`/api/public/facilities/${id}`);
+    const response = await apiRequest<ApiResponse<any>>(`/api/public/facilities/${id}`);
+    return response.data;
   },
 
   getMunicipalities: async () => {
-    return apiRequest<any[]>("/api/public/municipalities");
+    const response = await apiRequest<ApiResponse<any[]>>("/api/public/municipalities");
+    return response.data;
   },
 
   getFacilityTypes: async () => {
-    return apiRequest<any[]>("/api/public/facility-types");
+    const response = await apiRequest<ApiResponse<any[]>>("/api/public/facility-types");
+    return response.data;
   },
 };
 
 // Admin API (requires authentication)
 export const adminApi = {
   getMyFacilities: async () => {
-    return apiRequest<any[]>("/api/admin/facilities");
+    const response = await apiRequest<ApiResponse<any[]>>("/api/admin/facilities");
+    return response.data;
   },
 
   createFacility: async (data: any) => {
-    return apiRequest<any>("/api/admin/facilities", {
+    const response = await apiRequest<ApiResponse<any>>("/api/admin/facilities", {
       method: "POST",
       body: JSON.stringify(data),
     });
+    return response.data;
   },
 
   updateFacility: async (id: number, data: any) => {
-    return apiRequest<any>(`/api/admin/facilities/${id}`, {
+    const response = await apiRequest<ApiResponse<any>>(`/api/admin/facilities/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
+    return response.data;
   },
 
   deleteFacility: async (id: number) => {
-    return apiRequest<any>(`/api/admin/facilities/${id}`, {
+    const response = await apiRequest<ApiResponse<any>>(`/api/admin/facilities/${id}`, {
       method: "DELETE",
     });
+    return response.data;
   },
 };
 
