@@ -47,7 +47,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Type assertion needed for proper TypeScript compilation in Azure
-    const results: NominatimResult[] = await response.json();
+    const results = await response.json() as NominatimResult[];
     console.log("Nominatim results:", JSON.stringify(results));
 
     if (results && results.length > 0) {
