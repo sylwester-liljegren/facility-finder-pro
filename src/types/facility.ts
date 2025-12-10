@@ -20,6 +20,7 @@ export interface Facility {
   address: string | null;
   postal_code: string | null;
   city: string | null;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
   facility_type?: FacilityType;

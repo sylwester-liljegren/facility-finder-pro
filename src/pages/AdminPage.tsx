@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FacilityForm } from "@/components/FacilityForm";
 import {
-  useFacilities,
+  useMyFacilities,
   useCreateFacility,
   useUpdateFacility,
   useDeleteFacility,
@@ -43,7 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const AdminPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const { data: facilities, isLoading: facilitiesLoading } = useFacilities();
+  const { data: facilities, isLoading: facilitiesLoading } = useMyFacilities();
   const createFacility = useCreateFacility();
   const updateFacility = useUpdateFacility();
   const deleteFacility = useDeleteFacility();

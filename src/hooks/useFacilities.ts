@@ -28,6 +28,30 @@ export function useFacilities(kommunId?: number) {
   });
 }
 
+export function useMyFacilities() {
+  return useQuery({
+    queryKey: ["my-facilities"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("facility")
+        .select(`
+          *,
+          facility_type (*),
+          kommun (*),
+          facility_geometry (*)
+        `)
+        .eq("created_by", user.id)
+        .order("name");
+
+      if (error) throw error;
+      return data as Facility[];
+    },
+  });
+}
+
 export function useFacility(id: number) {
   return useQuery({
     queryKey: ["facility", id],
@@ -83,12 +107,15 @@ export function useCreateFacility() {
 
   return useMutation({
     mutationFn: async (formData: FacilityFormData) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { latitude, longitude, ...facilityData } = formData;
 
-      // Insert facility
+      // Insert facility with created_by
       const { data: facility, error: facilityError } = await supabase
         .from("facility")
-        .insert(facilityData)
+        .insert({ ...facilityData, created_by: user.id })
         .select()
         .single();
 
@@ -112,6 +139,7 @@ export function useCreateFacility() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facilities"] });
+      queryClient.invalidateQueries({ queryKey: ["my-facilities"] });
       toast({
         title: "Anläggning skapad",
         description: "Den nya anläggningen har sparats.",
@@ -160,6 +188,7 @@ export function useUpdateFacility() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facilities"] });
+      queryClient.invalidateQueries({ queryKey: ["my-facilities"] });
       toast({
         title: "Anläggning uppdaterad",
         description: "Ändringarna har sparats.",
@@ -186,6 +215,7 @@ export function useDeleteFacility() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facilities"] });
+      queryClient.invalidateQueries({ queryKey: ["my-facilities"] });
       toast({
         title: "Anläggning borttagen",
         description: "Anläggningen har tagits bort.",
