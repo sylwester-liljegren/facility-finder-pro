@@ -128,8 +128,9 @@ export const publicApi = {
   },
 
   getFacility: async (id: number) => {
-    const response = await apiRequest<ApiResponse<any>>(`/api/public/facilities/${id}`);
-    return response.data;
+    // Backend uses query param, not path param
+    const response = await apiRequest<ApiResponse<any[]>>(`/api/public/facilities?id=${id}`);
+    return response.data?.[0] || null;
   },
 
   getMunicipalities: async () => {
