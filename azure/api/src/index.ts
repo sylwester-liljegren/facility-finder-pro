@@ -1,7 +1,3 @@
-// Load environment variables FIRST, before any other imports
-import dotenv from 'dotenv';
-dotenv.config();
-
 import express from 'express';
 import cors from 'cors';
 import { publicApiRouter } from './routes/public-api';
