@@ -25,10 +25,18 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   const initialLat = searchParams.get("lat");
   const initialLng = searchParams.get("lng");
 
+  // Helper to get geometry (handles both object and array)
+  const getGeometry = (f: Facility) => {
+    return Array.isArray(f.facility_geometry) 
+      ? f.facility_geometry[0] 
+      : f.facility_geometry;
+  };
+
   // Filter facilities with coordinates - always show all when no search
-  const facilitiesWithCoords = facilities.filter(
-    (f) => f.facility_geometry?.latitude && f.facility_geometry?.longitude
-  );
+  const facilitiesWithCoords = facilities.filter((f) => {
+    const geom = getGeometry(f);
+    return geom?.latitude && geom?.longitude;
+  });
 
   // Search filtered facilities (only filter markers, don't hide non-matching)
   const filteredFacilities = searchQuery
@@ -86,9 +94,10 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         // Fallback: if geocoding fails but we have matching facilities, zoom to them
         const bounds = new maplibregl.LngLatBounds();
         filteredFacilities.forEach((f) => {
+          const geom = getGeometry(f);
           bounds.extend([
-            f.facility_geometry!.longitude!,
-            f.facility_geometry!.latitude!,
+            geom!.longitude!,
+            geom!.latitude!,
           ]);
         });
         map.current.fitBounds(bounds, {
@@ -164,8 +173,9 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
 
     // Add markers for ALL facilities with coords (not filtered)
     facilitiesWithCoords.forEach((facility) => {
-      const lat = facility.facility_geometry!.latitude!;
-      const lng = facility.facility_geometry!.longitude!;
+      const geom = getGeometry(facility);
+      const lat = geom!.latitude!;
+      const lng = geom!.longitude!;
 
       // Check if this facility matches the search
       const isMatch = !searchQuery || filteredFacilities.some(f => f.id === facility.id);
