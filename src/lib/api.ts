@@ -1,6 +1,6 @@
 // API configuration for Azure Container Apps backend
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cif-api-app.proudground-0c10ab6c.swedencentral.azurecontainerapps.io";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://cif-container-app.politeflower-f7763a04.swedencentral.azurecontainerapps.io";
 
 // Token management
 const TOKEN_KEY = "auth_token";
