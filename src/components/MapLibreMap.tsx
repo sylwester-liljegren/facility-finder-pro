@@ -79,47 +79,29 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       const lat = facility.facility_geometry!.latitude!;
       const lng = facility.facility_geometry!.longitude!;
 
-      // Create custom marker element
-      const el = document.createElement("div");
-      el.className = "facility-marker";
-      el.style.cssText = `
-        width: 32px;
-        height: 32px;
-        background: hsl(var(--primary));
-        border: 3px solid white;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease;
-      `;
-      el.onmouseenter = () => {
-        el.style.transform = "scale(1.2)";
-      };
-      el.onmouseleave = () => {
-        el.style.transform = "scale(1)";
-      };
-
       // Create popup
       const popup = new maplibregl.Popup({
-        offset: 25,
-        closeButton: false,
-        className: "facility-popup",
+        offset: 15,
+        closeButton: true,
       }).setHTML(`
-        <div style="padding: 8px; max-width: 200px;">
-          <h3 style="font-weight: 600; margin-bottom: 4px; color: hsl(var(--foreground));">${facility.name}</h3>
-          ${facility.facility_type ? `<p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 2px;">${facility.facility_type.label}</p>` : ""}
-          ${facility.kommun ? `<p style="font-size: 12px; color: hsl(var(--muted-foreground));">${facility.kommun.kommun_namn}</p>` : ""}
-          ${facility.address ? `<p style="font-size: 11px; color: hsl(var(--muted-foreground)); margin-top: 4px;">${facility.address}</p>` : ""}
+        <div style="padding: 8px; max-width: 220px;">
+          <h3 style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${facility.name}</h3>
+          ${facility.facility_type ? `<p style="font-size: 12px; color: #666; margin: 2px 0;">${facility.facility_type.label}</p>` : ""}
+          ${facility.kommun ? `<p style="font-size: 12px; color: #666; margin: 2px 0;">${facility.kommun.kommun_namn}</p>` : ""}
+          ${facility.address ? `<p style="font-size: 11px; color: #888; margin-top: 4px;">${facility.address}</p>` : ""}
         </div>
       `);
 
-      const marker = new maplibregl.Marker({ element: el })
+      // Use default MapLibre marker (more stable)
+      const marker = new maplibregl.Marker({
+        color: "#3b82f6",
+      })
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map.current!);
 
-      // Handle click
-      el.addEventListener("click", () => {
+      // Handle click for dialog
+      marker.getElement().addEventListener("click", () => {
         if (onFacilityClick) {
           onFacilityClick(facility);
         }
@@ -128,8 +110,8 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       markersRef.current.push(marker);
     });
 
-    // Fit bounds if there are markers
-    if (filteredFacilities.length > 0) {
+    // Fit bounds if there are markers and search is active
+    if (filteredFacilities.length > 0 && searchQuery) {
       const bounds = new maplibregl.LngLatBounds();
       filteredFacilities.forEach((f) => {
         bounds.extend([
@@ -138,14 +120,11 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         ]);
       });
 
-      // Only fit bounds on initial load or when search changes significantly
-      if (searchQuery) {
-        map.current.fitBounds(bounds, {
-          padding: 60,
-          maxZoom: 12,
-          duration: 500,
-        });
-      }
+      map.current.fitBounds(bounds, {
+        padding: 60,
+        maxZoom: 12,
+        duration: 500,
+      });
     }
   }, [filteredFacilities, onFacilityClick, searchQuery]);
 
@@ -168,7 +147,7 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       {/* Legend */}
       <div className="absolute bottom-8 left-4 z-10 rounded-lg bg-background/95 backdrop-blur p-3 shadow-lg border border-border">
         <div className="flex items-center gap-2 text-sm">
-          <div className="h-4 w-4 rounded-full bg-primary border-2 border-white shadow" />
+          <div className="h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow" />
           <span className="text-muted-foreground">
             {filteredFacilities.length} anläggningar
             {searchQuery && ` (av ${facilitiesWithCoords.length})`}
