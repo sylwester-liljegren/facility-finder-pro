@@ -68,13 +68,6 @@ export function FacilityCard({ facility, onClick }: FacilityCardProps) {
               </dd>
             </div>
           )}
-          {facility.facility_type?.code && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Tag className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <dt className="sr-only">Typkod:</dt>
-              <dd className="font-mono text-xs">{facility.facility_type.code}</dd>
-            </div>
-          )}
         </dl>
 
         {hasCoordinates && (
