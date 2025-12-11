@@ -72,15 +72,10 @@ az containerapp update \
 # KLAR
 # =============================================================================
 echo ""
-echo "⏳ Deploy startad! (körs asynkront i Azure)"
+echo "✅ Deploy-kommando skickat! (körs asynkront i Azure)"
 echo ""
 echo "📍 Container App URL:"
-echo "   https://$(az containerapp show \
-  --name "$CONTAINER_APP_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --subscription "$SUBSCRIPTION_ID" \
-  --query "properties.configuration.ingress.fqdn" \
-  -o tsv 2>/dev/null || echo "hämtar...")"
+echo "   https://cif-container-app.politeflower-f7763a04.swedencentral.azurecontainerapps.io"
 echo ""
 echo "🔍 Verifiera deploy-status med:"
 echo "   az containerapp show --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --query properties.provisioningState -o tsv"
