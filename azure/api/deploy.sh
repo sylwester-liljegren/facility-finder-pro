@@ -58,25 +58,32 @@ echo "📤 Pushar till Azure Container Registry..."
 docker push "$ACR_NAME.azurecr.io/$IMAGE_NAME:$TAG"
 
 # =============================================================================
-# DEPLOY TILL CONTAINER APP
+# DEPLOY TILL CONTAINER APP (ASYNKRONT)
 # =============================================================================
-echo "🚀 Uppdaterar Container App..."
+echo "🚀 Uppdaterar Container App (asynkront)..."
 az containerapp update \
   --name "$CONTAINER_APP_NAME" \
   --resource-group "$RESOURCE_GROUP" \
   --image "$ACR_NAME.azurecr.io/$IMAGE_NAME:$TAG" \
-  --subscription "$SUBSCRIPTION_ID"
+  --subscription "$SUBSCRIPTION_ID" \
+  --no-wait
 
 # =============================================================================
 # KLAR
 # =============================================================================
 echo ""
-echo "✅ Deploy klar!"
+echo "⏳ Deploy startad! (körs asynkront i Azure)"
 echo ""
 echo "📍 Container App URL:"
-az containerapp show \
+echo "   https://$(az containerapp show \
   --name "$CONTAINER_APP_NAME" \
   --resource-group "$RESOURCE_GROUP" \
   --subscription "$SUBSCRIPTION_ID" \
   --query "properties.configuration.ingress.fqdn" \
-  -o tsv
+  -o tsv 2>/dev/null || echo "hämtar...")"
+echo ""
+echo "🔍 Verifiera deploy-status med:"
+echo "   az containerapp show --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --query properties.provisioningState -o tsv"
+echo ""
+echo "📋 Se senaste revision:"
+echo "   az containerapp revision list --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID -o table"
