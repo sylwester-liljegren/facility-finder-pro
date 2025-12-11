@@ -14,7 +14,7 @@ CONTAINER_APP_NAME="cif-container-app"
 
 # VIKTIGT: Ange din Azure subscription ID här
 # Hitta den med: az account list --query "[].{name:name, id:id}" -o table
-SUBSCRIPTION_ID=""
+SUBSCRIPTION_ID="92598e01-f344-4079-9f76-4df374860b68"
 
 # =============================================================================
 # VALIDERING
