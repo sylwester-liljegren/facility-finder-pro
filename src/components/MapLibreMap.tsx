@@ -3,7 +3,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Facility } from "@/types/facility";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { geocodeApi } from "@/lib/api";
 import { Search, Loader2 } from "lucide-react";
 
 interface MapLibreMapProps {
@@ -58,11 +58,9 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
     setIsSearching(true);
     try {
       // Always geocode the search query first
-      const { data, error } = await supabase.functions.invoke("geocode", {
-        body: { address: searchQuery },
-      });
+      const data = await geocodeApi.geocode({ address: searchQuery });
 
-      if (!error && data?.latitude && data?.longitude) {
+      if (data?.success && data?.latitude && data?.longitude) {
         // Remove previous location marker
         if (locationMarkerRef.current) {
           locationMarkerRef.current.remove();
