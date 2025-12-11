@@ -1,4 +1,6 @@
 #!/bin/bash
+# Deploy script för Azure Container Apps
+# Skapad: 2024-12-11
 set -e
 
 # Konfiguration
