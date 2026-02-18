@@ -1,3 +1,249 @@
-export function MapLibreMap() {
-  return null;
+import { useEffect, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { Facility } from "@/types/facility";
+import { useSearchParams } from "react-router-dom";
+import { geocodeApi } from "@/lib/api";
+import { Search, Loader2 } from "lucide-react";
+
+interface MapLibreMapProps {
+  facilities: Facility[];
+  onFacilityClick?: (facility: Facility) => void;
+  className?: string;
+}
+
+export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibreMapProps) {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const locationMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  const initialLat = searchParams.get("lat");
+  const initialLng = searchParams.get("lng");
+
+  const getGeometry = (f: Facility) => {
+    return Array.isArray(f.facility_geometry)
+      ? f.facility_geometry[0]
+      : f.facility_geometry;
+  };
+
+  const facilitiesWithCoords = facilities.filter((f) => {
+    const geom = getGeometry(f);
+    return geom?.latitude && geom?.longitude;
+  });
+
+  const filteredFacilities = searchQuery
+    ? facilitiesWithCoords.filter(
+        (f) =>
+          f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.kommun?.kommun_namn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.facility_type?.label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          f.postal_code?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : facilitiesWithCoords;
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || !map.current) return;
+
+    setIsSearching(true);
+    try {
+      const data = await geocodeApi.geocode({ address: searchQuery });
+
+      if (data?.success && data?.latitude && data?.longitude) {
+        if (locationMarkerRef.current) {
+          locationMarkerRef.current.remove();
+          locationMarkerRef.current = null;
+        }
+
+        map.current.flyTo({
+          center: [data.longitude, data.latitude],
+          zoom: 12,
+          duration: 1000,
+        });
+
+        if (filteredFacilities.length === 0) {
+          const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
+            <div style="padding: 8px;">
+              <p style="font-size: 12px; color: #666;">${data.displayName || searchQuery}</p>
+              <p style="font-size: 11px; color: #888;">Inga anläggningar här</p>
+            </div>
+          `);
+
+          locationMarkerRef.current = new maplibregl.Marker({ color: "#ef4444" })
+            .setLngLat([data.longitude, data.latitude])
+            .setPopup(popup)
+            .addTo(map.current);
+        }
+      } else if (filteredFacilities.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        filteredFacilities.forEach((f) => {
+          const geom = getGeometry(f);
+          bounds.extend([geom!.longitude!, geom!.latitude!]);
+        });
+        map.current.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 500 });
+      }
+    } catch (err) {
+      console.error("Geocode error:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
+  useEffect(() => {
+    if (!mapContainer.current) return;
+
+    const hasInitialPosition = initialLat && initialLng;
+    const center: [number, number] = hasInitialPosition
+      ? [parseFloat(initialLng), parseFloat(initialLat)]
+      : [16.5, 62.5];
+    const zoom = hasInitialPosition ? 14 : 4.5;
+
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      center,
+      zoom,
+      minZoom: 3,
+      maxZoom: 18,
+    });
+
+    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.current.addControl(
+      new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+      }),
+      "top-right"
+    );
+    map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
+    map.current.addControl(new maplibregl.ScaleControl(), "bottom-left");
+
+    return () => {
+      map.current?.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+
+    facilitiesWithCoords.forEach((facility) => {
+      const geom = getGeometry(facility);
+      const lat = geom!.latitude!;
+      const lng = geom!.longitude!;
+
+      const isMatch = !searchQuery || filteredFacilities.some((f) => f.id === facility.id);
+
+      const popup = new maplibregl.Popup({ offset: 15, closeButton: true }).setHTML(`
+        <div style="padding: 8px; max-width: 220px;">
+          <h3 style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${facility.name}</h3>
+          ${facility.facility_type ? `<p style="font-size: 12px; color: #666; margin: 2px 0;">${facility.facility_type.label}</p>` : ""}
+          ${facility.kommun ? `<p style="font-size: 12px; color: #666; margin: 2px 0;">${facility.kommun.kommun_namn}</p>` : ""}
+          ${facility.address ? `<p style="font-size: 11px; color: #888; margin-top: 4px;">${facility.address}</p>` : ""}
+        </div>
+      `);
+
+      const marker = new maplibregl.Marker({ color: isMatch ? "#3b82f6" : "#9ca3af" })
+        .setLngLat([lng, lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      marker.getElement().addEventListener("click", () => {
+        if (onFacilityClick) onFacilityClick(facility);
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [facilitiesWithCoords, filteredFacilities, onFacilityClick, searchQuery]);
+
+  return (
+    <div
+      className={`relative ${className}`}
+      role="application"
+      aria-label="Interaktiv karta med anläggningar"
+    >
+      <form
+        className="absolute top-3 left-3 right-3 md:right-auto z-10 flex gap-2"
+        role="search"
+        aria-label="Sök på kartan"
+        onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+      >
+        <div className="relative flex-1 md:w-72 md:flex-none">
+          <label htmlFor="map-search" className="sr-only">
+            Sök anläggning eller plats på kartan
+          </label>
+          <input
+            id="map-search"
+            type="search"
+            placeholder="Sök anläggning eller plats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full px-3 py-2 pr-10 rounded-lg bg-background/95 backdrop-blur border border-border shadow-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-describedby="search-status"
+          />
+          <button
+            type="submit"
+            disabled={isSearching}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            aria-label={isSearching ? "Söker..." : "Sök"}
+          >
+            {isSearching ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Search className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      </form>
+
+      <div id="search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {isSearching
+          ? "Söker efter platsen..."
+          : `${filteredFacilities.length} anläggningar visas på kartan`}
+      </div>
+
+      <div ref={mapContainer} className="w-full h-full rounded-lg" aria-hidden="true" tabIndex={-1} />
+
+      <div className="sr-only" role="region" aria-label="Kartinformation">
+        <h2>Anläggningar på kartan</h2>
+        <p>Kartan visar {filteredFacilities.length} anläggningar{searchQuery && ` för sökningen "${searchQuery}"`}.</p>
+        <ul>
+          {filteredFacilities.slice(0, 10).map((f) => (
+            <li key={f.id}>
+              {f.name}
+              {f.facility_type && `, ${f.facility_type.label}`}
+              {f.kommun && ` i ${f.kommun.kommun_namn}`}
+            </li>
+          ))}
+          {filteredFacilities.length > 10 && <li>Och {filteredFacilities.length - 10} fler anläggningar.</li>}
+        </ul>
+      </div>
+
+      <div
+        className="absolute bottom-3 left-3 z-10 rounded-lg bg-background/95 backdrop-blur px-3 py-2 shadow-lg border border-border"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-2 text-xs md:text-sm">
+          <div className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" aria-hidden="true" />
+          <span className="text-muted-foreground">
+            {filteredFacilities.length} anläggningar
+            {searchQuery && ` (av ${facilitiesWithCoords.length})`}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
