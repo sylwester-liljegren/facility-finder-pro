@@ -10,12 +10,12 @@ const MapPage = () => {
         <title>Kartvyn - Anläggningsregister</title>
         <meta name="description" content="Se kommunala anläggningar på en interaktiv karta. Sök och hitta idrottsanläggningar, simhallar och fritidsanläggningar i Sverige." />
       </Helmet>
-
+      
       <div className="min-h-screen bg-background flex flex-col">
         <SkipLink targetId="map-content">Hoppa till kartan</SkipLink>
-
+        
         <Header />
-
+        
         <main id="map-content" className="flex-1 flex flex-col" role="main">
           <div className="container py-4 md:py-8">
             <div className="mb-4 md:mb-8">
@@ -27,7 +27,7 @@ const MapPage = () => {
               </p>
             </div>
           </div>
-
+          
           <div className="flex-1 container pb-4 md:pb-8">
             <FacilityMap />
           </div>

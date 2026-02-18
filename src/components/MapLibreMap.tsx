@@ -21,20 +21,24 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   const [isSearching, setIsSearching] = useState(false);
   const [searchParams] = useSearchParams();
 
+  // Get initial position from URL params
   const initialLat = searchParams.get("lat");
   const initialLng = searchParams.get("lng");
 
+  // Helper to get geometry (handles both object and array)
   const getGeometry = (f: Facility) => {
-    return Array.isArray(f.facility_geometry)
-      ? f.facility_geometry[0]
+    return Array.isArray(f.facility_geometry) 
+      ? f.facility_geometry[0] 
       : f.facility_geometry;
   };
 
+  // Filter facilities with coordinates - always show all when no search
   const facilitiesWithCoords = facilities.filter((f) => {
     const geom = getGeometry(f);
     return geom?.latitude && geom?.longitude;
   });
 
+  // Search filtered facilities (only filter markers, don't hide non-matching)
   const filteredFacilities = searchQuery
     ? facilitiesWithCoords.filter(
         (f) =>
@@ -47,25 +51,30 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       )
     : facilitiesWithCoords;
 
+  // Geocode search function - always geocode first to find the location
   const handleSearch = async () => {
     if (!searchQuery.trim() || !map.current) return;
 
     setIsSearching(true);
     try {
+      // Always geocode the search query first
       const data = await geocodeApi.geocode({ address: searchQuery });
 
       if (data?.success && data?.latitude && data?.longitude) {
+        // Remove previous location marker
         if (locationMarkerRef.current) {
           locationMarkerRef.current.remove();
           locationMarkerRef.current = null;
         }
 
+        // Fly to the geocoded location
         map.current.flyTo({
           center: [data.longitude, data.latitude],
           zoom: 12,
           duration: 1000,
         });
 
+        // Only add a location marker if no facilities match in this area
         if (filteredFacilities.length === 0) {
           const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
             <div style="padding: 8px;">
@@ -80,12 +89,20 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
             .addTo(map.current);
         }
       } else if (filteredFacilities.length > 0) {
+        // Fallback: if geocoding fails but we have matching facilities, zoom to them
         const bounds = new maplibregl.LngLatBounds();
         filteredFacilities.forEach((f) => {
           const geom = getGeometry(f);
-          bounds.extend([geom!.longitude!, geom!.latitude!]);
+          bounds.extend([
+            geom!.longitude!,
+            geom!.latitude!,
+          ]);
         });
-        map.current.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 500 });
+        map.current.fitBounds(bounds, {
+          padding: 60,
+          maxZoom: 12,
+          duration: 500,
+        });
       }
     } catch (err) {
       console.error("Geocode error:", err);
@@ -94,19 +111,24 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
     }
   };
 
+  // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    // Determine initial center and zoom
     const hasInitialPosition = initialLat && initialLng;
     const center: [number, number] = hasInitialPosition
       ? [parseFloat(initialLng), parseFloat(initialLat)]
       : [16.5, 62.5];
     const zoom = hasInitialPosition ? 14 : 4.5;
 
+    // Initialize map
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
@@ -116,7 +138,10 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       maxZoom: 18,
     });
 
+    // Add navigation controls
     map.current.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    // Add geolocation control
     map.current.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
@@ -124,7 +149,11 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
       }),
       "top-right"
     );
+
+    // Add fullscreen control
     map.current.addControl(new maplibregl.FullscreenControl(), "top-right");
+
+    // Add scale control
     map.current.addControl(new maplibregl.ScaleControl(), "bottom-left");
 
     return () => {
@@ -132,20 +161,28 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
     };
   }, []);
 
+  // Update markers when facilities change (always show all facilities)
   useEffect(() => {
     if (!map.current) return;
 
+    // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
+    // Add markers for ALL facilities with coords (not filtered)
     facilitiesWithCoords.forEach((facility) => {
       const geom = getGeometry(facility);
       const lat = geom!.latitude!;
       const lng = geom!.longitude!;
 
-      const isMatch = !searchQuery || filteredFacilities.some((f) => f.id === facility.id);
+      // Check if this facility matches the search
+      const isMatch = !searchQuery || filteredFacilities.some(f => f.id === facility.id);
 
-      const popup = new maplibregl.Popup({ offset: 15, closeButton: true }).setHTML(`
+      // Create popup
+      const popup = new maplibregl.Popup({
+        offset: 15,
+        closeButton: true,
+      }).setHTML(`
         <div style="padding: 8px; max-width: 220px;">
           <h3 style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${facility.name}</h3>
           ${facility.facility_type ? `<p style="font-size: 12px; color: #666; margin: 2px 0;">${facility.facility_type.label}</p>` : ""}
@@ -154,13 +191,19 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         </div>
       `);
 
-      const marker = new maplibregl.Marker({ color: isMatch ? "#3b82f6" : "#9ca3af" })
+      // Use different colors for matching vs non-matching facilities
+      const marker = new maplibregl.Marker({
+        color: isMatch ? "#3b82f6" : "#9ca3af",
+      })
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map.current!);
 
+      // Handle click for dialog
       marker.getElement().addEventListener("click", () => {
-        if (onFacilityClick) onFacilityClick(facility);
+        if (onFacilityClick) {
+          onFacilityClick(facility);
+        }
       });
 
       markersRef.current.push(marker);
@@ -168,12 +211,13 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
   }, [facilitiesWithCoords, filteredFacilities, onFacilityClick, searchQuery]);
 
   return (
-    <div
+    <div 
       className={`relative ${className}`}
       role="application"
       aria-label="Interaktiv karta med anläggningar"
     >
-      <form
+      {/* Search input - responsive width */}
+      <form 
         className="absolute top-3 left-3 right-3 md:right-auto z-10 flex gap-2"
         role="search"
         aria-label="Sök på kartan"
@@ -208,17 +252,35 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
         </div>
       </form>
 
-      <div id="search-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {isSearching
-          ? "Söker efter platsen..."
-          : `${filteredFacilities.length} anläggningar visas på kartan`}
+      {/* Screen reader announcements */}
+      <div 
+        id="search-status" 
+        className="sr-only" 
+        role="status" 
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {isSearching 
+          ? "Söker efter platsen..." 
+          : `${filteredFacilities.length} anläggningar visas på kartan`
+        }
       </div>
 
-      <div ref={mapContainer} className="w-full h-full rounded-lg" aria-hidden="true" tabIndex={-1} />
+      {/* Map container */}
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg" 
+        aria-hidden="true"
+        tabIndex={-1}
+      />
 
+      {/* Accessible summary for screen readers */}
       <div className="sr-only" role="region" aria-label="Kartinformation">
         <h2>Anläggningar på kartan</h2>
-        <p>Kartan visar {filteredFacilities.length} anläggningar{searchQuery && ` för sökningen "${searchQuery}"`}.</p>
+        <p>
+          Kartan visar {filteredFacilities.length} anläggningar
+          {searchQuery && ` för sökningen "${searchQuery}"`}.
+        </p>
         <ul>
           {filteredFacilities.slice(0, 10).map((f) => (
             <li key={f.id}>
@@ -227,17 +289,23 @@ export function MapLibreMap({ facilities, onFacilityClick, className }: MapLibre
               {f.kommun && ` i ${f.kommun.kommun_namn}`}
             </li>
           ))}
-          {filteredFacilities.length > 10 && <li>Och {filteredFacilities.length - 10} fler anläggningar.</li>}
+          {filteredFacilities.length > 10 && (
+            <li>Och {filteredFacilities.length - 10} fler anläggningar.</li>
+          )}
         </ul>
       </div>
 
-      <div
+      {/* Legend - responsive positioning */}
+      <div 
         className="absolute bottom-3 left-3 z-10 rounded-lg bg-background/95 backdrop-blur px-3 py-2 shadow-lg border border-border"
         role="status"
         aria-live="polite"
       >
         <div className="flex items-center gap-2 text-xs md:text-sm">
-          <div className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" aria-hidden="true" />
+          <div 
+            className="h-3 w-3 md:h-4 md:w-4 rounded-full bg-blue-500 border-2 border-white shadow" 
+            aria-hidden="true"
+          />
           <span className="text-muted-foreground">
             {filteredFacilities.length} anläggningar
             {searchQuery && ` (av ${facilitiesWithCoords.length})`}

@@ -66,7 +66,8 @@ export function FacilityMap() {
                   return geom?.latitude ? (
                     <p>
                       <span className="font-medium">Koordinater:</span>{" "}
-                      {geom.latitude.toFixed(4)}, {geom.longitude?.toFixed(4)}
+                      {geom.latitude.toFixed(4)},{" "}
+                      {geom.longitude?.toFixed(4)}
                     </p>
                   ) : null;
                 })()}
