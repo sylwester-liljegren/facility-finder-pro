@@ -112,7 +112,7 @@ const AuthPage = () => {
   return (
     <>
       <Helmet>
-        <title>Logga in - Anläggningsregister 😊</title>
+        <title>Logga in - Anläggningsregister</title>
         <meta name="description" content="Logga in för att administrera kommunala anläggningar i registret." />
       </Helmet>
       
@@ -130,7 +130,7 @@ const AuthPage = () => {
                 <Building2 className="h-6 w-6 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl" id="auth-title">Anläggningsregister 😊</CardTitle>
+            <CardTitle className="text-2xl" id="auth-title">Anläggningsregister</CardTitle>
             <CardDescription>
               Logga in för att administrera anläggningar
             </CardDescription>
