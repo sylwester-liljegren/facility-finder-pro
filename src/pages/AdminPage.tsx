@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
@@ -51,7 +51,6 @@ const AdminPage = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [deletingFacility, setDeletingFacility] = useState<Facility | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -62,7 +61,6 @@ const AdminPage = () => {
   const handleCreate = async (data: FacilityFormData) => {
     await createFacility.mutateAsync(data);
     setIsCreateOpen(false);
-    setSuccessMessage("Anläggningen har skapats! 🎉");
   };
 
   const handleUpdate = async (data: FacilityFormData) => {
@@ -263,19 +261,6 @@ const AdminPage = () => {
             >
               Ta bort
             </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Success Popup */}
-      <AlertDialog open={!!successMessage} onOpenChange={() => setSuccessMessage(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Klart!</AlertDialogTitle>
-            <AlertDialogDescription>{successMessage}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setSuccessMessage(null)}>OK</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
