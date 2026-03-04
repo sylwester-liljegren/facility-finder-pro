@@ -7,7 +7,7 @@ const MapPage = () => {
   return (
     <>
       <Helmet>
-        <title>Kartvyn - Anläggningsregister</title>
+        <title>Kartvyn - Anläggningsregister 😊</title>
         <meta name="description" content="Se kommunala anläggningar på en interaktiv karta. Sök och hitta idrottsanläggningar, simhallar och fritidsanläggningar i Sverige." />
       </Helmet>
       
