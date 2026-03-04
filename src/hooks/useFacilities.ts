@@ -65,10 +65,6 @@ export function useCreateFacility() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["facilities"] });
       queryClient.invalidateQueries({ queryKey: ["my-facilities"] });
-      toast({
-        title: "Anläggning skapad",
-        description: "Den nya anläggningen har sparats.",
-      });
     },
     onError: (error: Error) => {
       toast({
