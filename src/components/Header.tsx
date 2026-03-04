@@ -25,12 +25,12 @@ export function Header() {
         <Link 
           to="/" 
           className="flex items-center gap-2 font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
-          aria-label="Anläggningsregister - Startsida"
+          aria-label="Anläggningsregister 😊 - Startsida"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary" aria-hidden="true">
             <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="hidden sm:inline-block">Anläggningsregister</span>
+          <span className="hidden sm:inline-block">Anläggningsregister 😊</span>
         </Link>
 
         {/* Desktop Navigation */}

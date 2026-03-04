@@ -12,7 +12,7 @@ const Index = () => {
     <>
       <Helmet>
         <html lang="sv" />
-        <title>Anläggningsregister - Kommunala anläggningar i Sverige</title>
+        <title>Anläggningsregister 😊 - Kommunala anläggningar i Sverige</title>
         <meta name="description" content="Hitta och utforska idrottsanläggningar, simhallar, friidrottsarenor och andra kommunala anläggningar i Sverige." />
       </Helmet>
       
@@ -149,7 +149,7 @@ const Index = () => {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">Anläggningsregister</span>
+                <span className="font-medium">Anläggningsregister 😊</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Ett öppet register för kommunala anläggningar
