@@ -281,7 +281,5 @@ const AdminPage = () => {
       </AlertDialog>
     </div>
   );
-};
-};
 
 export default AdminPage;
