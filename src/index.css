@@ -1,119 +1,122 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Windows 98 Design System */
+/* Nordic Government Design System - Clean, Accessible, Trustworthy */
 
 @layer base {
   :root {
-    /* Classic Win98 Silver/Gray */
-    --background: 0 0% 75%;
-    --foreground: 0 0% 0%;
+    /* Nordic Blue Palette - Government/Trust */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
 
-    --card: 0 0% 75%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
 
-    --popover: 0 0% 75%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
 
-    /* Primary: Win98 Navy Blue (title bar) */
-    --primary: 240 100% 25%;
+    /* Primary: Nordic Blue */
+    --primary: 210 70% 35%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary */
-    --secondary: 0 0% 83%;
-    --secondary-foreground: 0 0% 0%;
+    /* Secondary: Light Blue-Gray */
+    --secondary: 210 25% 92%;
+    --secondary-foreground: 215 25% 25%;
 
-    /* Muted */
-    --muted: 0 0% 83%;
-    --muted-foreground: 0 0% 30%;
+    /* Muted: Subtle Gray */
+    --muted: 210 15% 95%;
+    --muted-foreground: 215 15% 45%;
 
-    /* Accent: Teal/highlight */
-    --accent: 240 100% 25%;
+    /* Accent: Teal */
+    --accent: 180 45% 40%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
-    --destructive: 0 100% 50%;
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders */
-    --border: 0 0% 50%;
-    --input: 0 0% 100%;
-    --ring: 240 100% 25%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 70% 35%;
 
-    --radius: 0px;
+    --radius: 0.5rem;
 
     /* Custom tokens */
-    --success: 120 100% 25%;
+    --success: 145 60% 40%;
     --success-foreground: 0 0% 100%;
-    --warning: 40 100% 50%;
-    --warning-foreground: 0 0% 0%;
+    --warning: 40 90% 50%;
+    --warning-foreground: 0 0% 10%;
 
-    /* Win98 3D border colors */
-    --win98-highlight: 0 0% 100%;
-    --win98-light: 0 0% 87%;
-    --win98-shadow: 0 0% 50%;
-    --win98-dark-shadow: 0 0% 0%;
-    --win98-face: 0 0% 75%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 70% 35%), hsl(210 60% 45%));
+    --gradient-hero: linear-gradient(180deg, hsl(210 25% 97%) 0%, hsl(210 30% 94%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 99%) 100%);
 
-    /* Gradients - flat for Win98 */
-    --gradient-primary: linear-gradient(90deg, hsl(240 100% 25%), hsl(180 100% 25%));
-    --gradient-hero: hsl(0 0% 75%);
-    --gradient-card: hsl(0 0% 75%);
-
-    /* Shadows - Win98 uses border tricks, not box shadows */
-    --shadow-sm: none;
-    --shadow-md: none;
-    --shadow-lg: none;
-    --shadow-xl: none;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.08), 0 2px 4px -2px hsl(215 25% 15% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.1), 0 4px 6px -4px hsl(215 25% 15% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(215 25% 15% / 0.1), 0 8px 10px -6px hsl(215 25% 15% / 0.05);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 75%;
-    --sidebar-foreground: 0 0% 0%;
-    --sidebar-primary: 240 100% 25%;
+    --sidebar-background: 210 25% 97%;
+    --sidebar-foreground: 215 25% 25%;
+    --sidebar-primary: 210 70% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 83%;
-    --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 50%;
-    --sidebar-ring: 240 100% 25%;
+    --sidebar-accent: 210 20% 92%;
+    --sidebar-accent-foreground: 215 25% 25%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 210 70% 35%;
   }
 
   .dark {
-    /* Win98 doesn't have dark mode - keep same */
-    --background: 0 0% 75%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 75%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 75%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 240 100% 25%;
+    --background: 215 30% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 215 25% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 215 25% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 210 60% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 83%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 83%;
-    --muted-foreground: 0 0% 30%;
-    --accent: 240 100% 25%;
+
+    --secondary: 215 20% 20%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 15% 60%;
+
+    --accent: 180 45% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 100% 50%;
+
+    --destructive: 0 60% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 50%;
-    --input: 0 0% 100%;
-    --ring: 240 100% 25%;
-    --success: 120 100% 25%;
-    --warning: 40 100% 50%;
-    --gradient-primary: linear-gradient(90deg, hsl(240 100% 25%), hsl(180 100% 25%));
-    --gradient-hero: hsl(0 0% 75%);
-    --gradient-card: hsl(0 0% 75%);
-    --sidebar-background: 0 0% 75%;
-    --sidebar-foreground: 0 0% 0%;
-    --sidebar-primary: 240 100% 25%;
+
+    --border: 215 20% 20%;
+    --input: 215 20% 20%;
+    --ring: 210 60% 55%;
+
+    --success: 145 50% 45%;
+    --warning: 40 80% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(210 60% 50%), hsl(210 50% 60%));
+    --gradient-hero: linear-gradient(180deg, hsl(215 30% 8%) 0%, hsl(215 25% 12%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(215 25% 12%) 0%, hsl(215 25% 14%) 100%);
+
+    --sidebar-background: 215 25% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 210 60% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 83%;
-    --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 50%;
-    --sidebar-ring: 240 100% 25%;
+    --sidebar-accent: 215 20% 18%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 215 20% 18%;
+    --sidebar-ring: 210 60% 55%;
   }
 }
 
@@ -123,30 +126,24 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'MS Sans Serif', 'Tahoma', 'VT323', Arial, sans-serif;
-    font-size: 13px;
-    -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: unset;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold;
-    font-family: 'MS Sans Serif', 'Tahoma', 'VT323', Arial, sans-serif;
+    @apply font-semibold tracking-tight;
   }
 
   code, pre {
-    font-family: 'Fixedsys', 'Courier New', monospace;
+    font-family: 'IBM Plex Mono', monospace;
   }
 
-  /* Win98 focus style - dotted outline */
+  /* WCAG: Improved focus indicators */
   :focus-visible {
-    outline: 1px dotted hsl(0 0% 0%);
-    outline-offset: -1px;
-    box-shadow: none;
-    ring: none;
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
+  /* WCAG: Reduced motion for users who prefer it */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -158,6 +155,7 @@
     }
   }
 
+  /* WCAG: Skip link styling */
   .sr-only:focus {
     position: absolute;
     width: auto;
@@ -171,48 +169,6 @@
 }
 
 @layer components {
-  /* Win98 raised 3D border (buttons, panels) */
-  .win98-raised {
-    border: 2px solid;
-    border-color: hsl(var(--win98-highlight)) hsl(var(--win98-dark-shadow)) hsl(var(--win98-dark-shadow)) hsl(var(--win98-highlight));
-    box-shadow: inset 1px 1px 0 hsl(var(--win98-light)), inset -1px -1px 0 hsl(var(--win98-shadow));
-  }
-
-  /* Win98 sunken 3D border (inputs, text areas) */
-  .win98-sunken {
-    border: 2px solid;
-    border-color: hsl(var(--win98-shadow)) hsl(var(--win98-highlight)) hsl(var(--win98-highlight)) hsl(var(--win98-shadow));
-    box-shadow: inset 1px 1px 0 hsl(var(--win98-dark-shadow)), inset -1px -1px 0 hsl(var(--win98-light));
-  }
-
-  /* Win98 pressed button */
-  .win98-pressed {
-    border: 2px solid;
-    border-color: hsl(var(--win98-dark-shadow)) hsl(var(--win98-highlight)) hsl(var(--win98-highlight)) hsl(var(--win98-dark-shadow));
-    box-shadow: inset 1px 1px 0 hsl(var(--win98-shadow)), inset -1px -1px 0 hsl(var(--win98-light));
-  }
-
-  /* Win98 title bar */
-  .win98-titlebar {
-    background: linear-gradient(90deg, hsl(240 100% 25%), hsl(180 100% 35%));
-    color: white;
-    font-weight: bold;
-    padding: 2px 4px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    user-select: none;
-  }
-
-  /* Win98 window */
-  .win98-window {
-    background: hsl(var(--win98-face));
-    border: 2px solid;
-    border-color: hsl(var(--win98-highlight)) hsl(var(--win98-dark-shadow)) hsl(var(--win98-dark-shadow)) hsl(var(--win98-highlight));
-    box-shadow: inset 1px 1px 0 hsl(var(--win98-light)), inset -1px -1px 0 hsl(var(--win98-shadow));
-    padding: 3px;
-  }
-
   .gradient-primary {
     background: var(--gradient-primary);
   }
@@ -226,11 +182,11 @@
   }
 
   .shadow-card {
-    box-shadow: none;
+    box-shadow: var(--shadow-md);
   }
 
   .shadow-card-hover {
-    box-shadow: none;
+    box-shadow: var(--shadow-lg);
   }
 
   .text-balance {
@@ -240,29 +196,45 @@
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.15s ease-out forwards;
+    animation: fadeIn 0.5s ease-out forwards;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.15s ease-out forwards;
+    animation: slideUp 0.5s ease-out forwards;
   }
 
   .animate-slide-in-right {
-    animation: slideInRight 0.15s ease-out forwards;
+    animation: slideInRight 0.4s ease-out forwards;
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }
